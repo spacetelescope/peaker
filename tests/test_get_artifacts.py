@@ -62,4 +62,4 @@ def test_get_artifacts(tmpdir):
 
     assert type(outdir) == pathlib._local.PosixPath
     assert outdir.exists()
-    """
+"""
