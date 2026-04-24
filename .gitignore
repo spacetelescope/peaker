@@ -1,6 +1,11 @@
 # Peaker
 peaker_outputs
 _version.py
+*.pdf
+*.csv
+
+# System
+.DS_Store
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
