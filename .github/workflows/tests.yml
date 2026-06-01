@@ -25,8 +25,8 @@ jobs:
       - id: supported-pythons
         uses: zacharyburnett/supported-pythons@2.0.1
         with:
-          package: ${{ inputs.git_repository }}
-          package-ref: ${{ inputs.git_ref }}
+          package: "x${{ inputs.git_repository }}x"
+          package-ref: "x${{ inputs.git_ref }}x"
     outputs:
       versions: ${{ steps.supported-pythons.outputs.versions }}
   test:
