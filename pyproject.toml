@@ -2,7 +2,7 @@
 name = "peaker"
 description = "Generate memory usage reports from JUnit results"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 license-files = ["LICENSE.txt"]
 authors = [
     { name = "Maria Pena-Guerrero" },
