@@ -1,6 +1,8 @@
-*************************
-peaker Documentation
-*************************
+===============================
+peaker
+===============================
+
+**Version**: |release|
 
 This is the documentation for ``peaker``,
 a package that creates a PDF report for the regression tests that
@@ -18,7 +20,14 @@ lowest (if the differences are negative, it means an improvement
 at the end of the period with respect to the start of the period).
 
 
-Reference/API
-=============
+============
+Contributing
+============
 
-.. automodapi:: peaker
+``peaker`` is an open source package written in Python.
+The source code is `available on GitHub <https://github.com/spacetelescope/peaker>`_.
+New contributions and contributors are very welcome!
+
+Please read `CONTRIBUTING.md <https://github.com/spacetelescope/peaker/blob/main/CONTRIBUTING.md>`_.
+
+We strive to provide a welcoming community by abiding with our `CODE_OF_CONDUCT.md <https://github.com/spacetelescope/peaker/blob/main/CODE_OF_CONDUCT.md>`_.

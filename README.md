@@ -1,13 +1,13 @@
-Peaker
-======
+<a href="https://stsci.edu">
+  <img src="docs/_static/stsci_pri_combo_mark_horizonal_white_bkgd.png" alt="Space Telescope Science Institute" width="83%" style="margin-left: auto;"/>
+</a>
 
-.. image:: https://github.com/spacetelescope/peaker/actions/workflows/tests.yml/badge.svg
-    :target: https://codecov.io/gh/spacetelescope/peaker
-    :alt: Coverage Status
+#Peaker
 
-.. image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
-    :target: http://www.astropy.org
-    :alt: Powered by Astropy Badge
+[![build](https://github.com/spacetelescope/peaker/actions/workflows/build.yml/badge.svg)](https://github.com/spacetelescope/peaker/actions/workflows/build.yml)
+[![tests](https://github.com/spacetelescope/peaker/actions/workflows/tests.yml/badge.svg)](https://github.com/spacetelescope/peaker/actions/workflows/tests.yml)
+[![ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![Powered by STScI](https://img.shields.io/badge/powered%20by-STScI-blue.svg?colorA=707170&colorB=3e8ddd&style=flat)](https://www.stsci.edu)
 
 
 This package is designed to provide a PDF report of a calibration pipeline's regression
@@ -17,14 +17,11 @@ requires user credentials to Artifactory, and, for now, it works for JWST and RO
 
 
 
-Installation
-------------
+## Installation
 
-Install with ```pip install peaker```.
+Install with `pip install peaker`.
 
-
-Inputs
-------
+## Inputs
 
 The code requires only one input, a text file with the Artifactory user credentials.
 This file should only contain two variables with their corresponding values as
@@ -35,9 +32,7 @@ shown below:
 `ART_API_KEY = api_key_here`
 
 
-Usage
------
-
+# Usage
 Run `peaker` from the terminal as:
 
 .. code-block:: bash
@@ -45,9 +40,7 @@ Run `peaker` from the terminal as:
     peaker somewhere/user_credentials.txt -p=2025-10-01to2026-03-26
 
 
-
-Optional arguments
-------------------
+## Optional Arguments
 
 ``--xmldir or -x``
     Path of the directory to save/read the XML files.
@@ -79,9 +72,7 @@ Optional arguments
 ``-s``
     Skip downloading the xml files. This option requires the -x flag as well.
 
-
-Outputs
--------
+## Outputs
 
 There are a few outputs of the program:
 
@@ -119,8 +110,7 @@ There are a few outputs of the program:
 
 
 
-Documentation
--------------
+## Documentation
 
 To build the documents locally, in the terminal do:
 
@@ -137,14 +127,12 @@ or
 
 
 
-License
--------
+## License
 
-See `LICENSE.rst` for more information.
+See `LICENSE.txt` for more information.
 
 
-Contributing
-------------
+## Contributing
 
 We love contributions! `peaker` is open source,
 built on open source, and we'd love to have you hang out in our community.
