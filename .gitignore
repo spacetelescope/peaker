@@ -57,6 +57,16 @@ pip-wheel-metadata/
 .project
 .pydevproject
 .settings
+*.png
+/*.png
+*/*/*.png
+*.pdf
+/*.pdf
+/*/*.pdf
+*.csv
+/*.csv
+/*/*.csv
+
 
 # Mac OSX
 .DS_Store

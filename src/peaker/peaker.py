@@ -22,7 +22,8 @@ def main():
     parser.add_argument("--xmldir", "-x",
                         action="store",
                         default=None,
-                        help="Path of the directory to save/read the XML files.")
+                        help="Path of the directory to save/read the XML files. If this flag is given, the "
+                             "Artifactory search will be skipped, e.g. -x=path/to/xml_files.")
     parser.add_argument("--mission", "-m",
                         action="store",
                         default="jwst",
@@ -49,11 +50,6 @@ def main():
                         action="store",
                         default="3.12",
                         help="Python version tested in the regression tests, e.g. -v=3.11")
-    parser.add_argument("-s",
-                        dest="skip_download_artifacts",
-                        action="store_true",
-                        default=False,
-                        help="Use flag -s to skip downloading artifacts and just read from xmldir.")
 
     args = parser.parse_args()
 
@@ -65,7 +61,6 @@ def main():
     period = args.period
     localtz = args.localtz
     py_version = "py" + args.py_version
-    skip_download_artifacts = args.skip_download_artifacts
 
     # Get the path where to find xml files
     if xmldir is not None:
@@ -73,12 +68,23 @@ def main():
 
     # Get the appropriate Artifactory repo name and the
     # corresponding description of pool tests
-    if mission == "jwst":
-        art_repo = ART_JWST_REPO
-        pools = POOLS_JWST
-    elif mission == "roman":
-        art_repo = ART_ROMAN_REPO
-        pools = POOLS_ROMAN
+    supported_missions = {
+        "jwst": {
+            "art_repo": ART_JWST_REPO,
+            "pools": POOLS_JWST
+        },
+        "roman": {
+            "art_repo": ART_ROMAN_REPO,
+            "pools": POOLS_ROMAN
+        }
+    }
+    if mission not in supported_missions:
+        print("\n Supported missions are: {}".format(", ".join(supported_missions.keys())))
+        raise ValueError("\n*** Mission {} is not supported. *** \n".format(mission.upper()))
+    else:
+        art_repo = supported_missions[mission]["art_repo"]
+        pools = supported_missions[mission]["pools"]
+    print("\n ---> Repository being searched: {} \n".format(art_repo))
 
     # Set the start and end dates in UTC
     start_date, end_date = None, None
@@ -94,20 +100,22 @@ def main():
         end_date = end_date.astimezone(timezone.utc)
 
     # Sanity check
-    if end_date < start_date:
-        print("Start date must be before end date. Switching start date to end date and vice versa.")
-        new_end_date = start_date
-        new_start_date = end_date
-        start_date = new_start_date
-        end_date = new_end_date
+    if start_date is not None and end_date is not None:
+        if end_date < start_date:
+            print("Start date must be before end date. Switching start date to end date and vice versa.")
+            new_end_date = start_date
+            new_start_date = end_date
+            start_date = new_start_date
+            end_date = new_end_date
 
     # Get relevant xml files from artifactory
-    if not skip_download_artifacts:
+    if xmldir is None:
         xmldir = get_artifacts(credentials_file, art_repo, py_version,
                                outdir=xmldir, start_date=start_date, end_date=end_date)
     else:
-        if xmldir is None:
-            raise ValueError("No XML directory specified.")
+        print(" * Artifactory search will be skipped.")
+        if not xmldir.exists():
+            raise FileNotFoundError("xmldir does not exist.")
 
     # Store memory info in a dictionary of test name and points per date
     output = parse_xmls(xmldir, localtz)

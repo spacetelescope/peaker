@@ -9,6 +9,7 @@ def _get_plt_path(plots, test_name, test_class):
     plt_name = None
     for plt in plots:
         plt_basename = os.path.basename(plt)
+        print(plt_basename)
         if test_name in plt_basename and test_class in plt_basename:
             plt_name = plt
             break

@@ -129,6 +129,7 @@ def parse_xmls(xmldir, localtz):
 
         elif peakmem_dict:
             successful_runs += 1
+            print("   Successful run: ", test_date, xmlfile)
             for test_name, test_dict in peakmem_dict.items():
                 classname = test_dict["classname"]
                 peakmem = int(test_dict["peakmem"])

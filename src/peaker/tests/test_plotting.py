@@ -1,13 +1,15 @@
 import os
+import pytest
 from pathlib import Path
 
 from peaker.parse_xmls import parse_xmls
 from peaker.plotting import mk_plots
 
 
-def test_create_pdf(tmpdir):
+@pytest.mark.parametrize("mission", ["jwst", "roman"])
+def test_create_pdf(mission, tmpdir):
     script_dir = Path(__file__).resolve().parent
-    data_dir = script_dir / "Data"
+    data_dir = script_dir / "Data" / mission
 
     # Move into temp dir so that the output is created in there
     os.chdir(tmpdir)
