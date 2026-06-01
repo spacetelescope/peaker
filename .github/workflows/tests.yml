@@ -23,10 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: supported-pythons
-        uses: zacharyburnett/supported-pythons@2.0.2
+        uses: zacharyburnett/supported-pythons@2.0.3
         with:
           package: "${{ github.repository }}"
-          #package-ref: "${{ github.ref_head }}"
+          package-ref: "${{ github.ref || github.sha }}"
     outputs:
       versions: ${{ steps.supported-pythons.outputs.versions }}
   test:
