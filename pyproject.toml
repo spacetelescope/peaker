@@ -16,10 +16,10 @@ classifiers = [
 ]
 dependencies = [
     "cruft",
-    "astropy>=4",
+    "astropy>=7.2.0",
     "fpdf2",
     "matplotlib",
-    "numpy>=1.25",
+    "numpy>=2.4.6",
     "pyartifactory",
     "tzdata",
 ]
@@ -30,7 +30,7 @@ repository = "https://github.com/spacetelescope/peaker"
 
 [project.optional-dependencies]
 docs = ["numpydoc", "pytest_doctestplus", "sphinx", "sphinx-autoapi", "sphinx-rtd-theme"]
-test = ["pytest>=9", "pytest_doctestplus", "coverage"]
+test = ["pytest>=9.0.3", "pytest_doctestplus", "coverage"]
 contrib = ["ruff", "ty"]
 
 [project.scripts]
@@ -38,7 +38,7 @@ peaker = "peaker.peaker:main"
 
 [build-system]
 requires = [
-  "setuptools>=61.2",
+  "setuptools>=82.0.1",
   "setuptools_scm[toml]",
 ]
 build-backend = "setuptools.build_meta"
