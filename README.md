@@ -2,7 +2,7 @@
   <img src="docs/_static/stsci_pri_combo_mark_horizonal_white_bkgd.png" alt="Space Telescope Science Institute" width="83%" style="margin-left: auto;"/>
 </a>
 
-#Peaker
+# Peaker
 
 [![build](https://github.com/spacetelescope/peaker/actions/workflows/build.yml/badge.svg)](https://github.com/spacetelescope/peaker/actions/workflows/build.yml)
 [![tests](https://github.com/spacetelescope/peaker/actions/workflows/tests.yml/badge.svg)](https://github.com/spacetelescope/peaker/actions/workflows/tests.yml)
