@@ -15,7 +15,6 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Astronomy",
 ]
 dependencies = [
-    "cruft",
     "astropy>=4",
     "fpdf2",
     "matplotlib",
