@@ -1,7 +1,7 @@
 import sys
 import pytest
 
-from src.peaker.peaker import main as peaker_main
+from peaker.peaker import main as peaker_main
 
 
 def test_bad_mission(monkeypatch):

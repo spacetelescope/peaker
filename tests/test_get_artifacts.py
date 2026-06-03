@@ -5,8 +5,8 @@ import pathlib
 from datetime import datetime, UTC, tzinfo, timezone, timedelta
 from dataclasses import dataclass
 
-from src.peaker.get_artifacts import get_artifacts, _filter_artifacts
-from src.peaker.tests.conftest import tmpdir
+from peaker.get_artifacts import get_artifacts, _filter_artifacts, _list_artifacts
+from .conftest import tmpdir
 
 
 
