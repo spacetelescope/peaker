@@ -69,8 +69,9 @@ Run `peaker` from the terminal as:
     Python version tested in the regression tests, e.g. -v=3.11. Default is 3.12. Regression
     Tests will usually test at least 3 versions of Python.
 
-``-s``
-    Skip downloading the XML files. This option requires the -x flag as well.
+``--with-failures or -f``
+    Include XML files that have failures > 0. Default is False.
+
 
 ## Outputs
 

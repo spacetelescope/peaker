@@ -73,7 +73,7 @@ class ArtifactListFileResponse:
     sha1: str
     sha2: str
 
-def mk_artifact(credentials_file="file.txt", art_repo="jwst-pipeline-results"):
+def mk_artifact(art_repo="jwst-pipeline-results"):
     """Creates fake artifact for testing."""
     art = Art(art_repo,
                datetime(2026, 5, 29, 12, 37, 46, 9000,
@@ -119,6 +119,6 @@ def test_filter_artifacts(tmpdir):
     end_date = datetime(2025, 8, 29, 14, 4, 1, 915000,
                         tzinfo=timezone(timedelta(hours=-4)))
     py_version = "py3.12"
-    artifacts2download = _filter_artifacts("jwst-pipeline-results", artifacts, start_date, end_date, py_version)
+    artifacts2download = _filter_artifacts(artifacts, start_date, end_date, py_version)
 
     assert len(artifacts2download) == 1

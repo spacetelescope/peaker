@@ -50,6 +50,11 @@ def main():
                         action="store",
                         default="3.12",
                         help="Python version tested in the regression tests, e.g. -v=3.11")
+    parser.add_argument("--with-failures", "-f",
+                        dest="with_failures",
+                        action="store_true",
+                        default=False,
+                        help="Include XML files that have failures > 0. Default is False.")
 
     args = parser.parse_args()
 
@@ -61,6 +66,7 @@ def main():
     period = args.period
     localtz = args.localtz
     py_version = "py" + args.py_version
+    with_failures = args.with_failures
 
     # Get the path where to find xml files
     if xmldir is not None:
@@ -118,7 +124,7 @@ def main():
             raise FileNotFoundError("xmldir does not exist.")
 
     # Store memory info in a dictionary of test name and points per date
-    output = parse_xmls(xmldir, localtz)
+    output = parse_xmls(xmldir, localtz, with_failures=with_failures)
 
     # Create table of tests, versions, results, and print it in a csv file
     generate_report_table(output, mission, pools=pools)

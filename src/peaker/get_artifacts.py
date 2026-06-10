@@ -39,7 +39,7 @@ def _list_artifacts(credentials_file, art_repo):
     return art, artifacts
 
 
-def _filter_artifacts(art_repo, artifacts, start_date, end_date, py_version):
+def _filter_artifacts(artifacts, start_date, end_date, py_version):
     artifacts2download = {}
     for artifact in artifacts.files:
         # Proceed with download if within the desired dates
@@ -121,7 +121,7 @@ def get_artifacts(credentials_file, art_repo, py_version, outdir=None, start_dat
             outdir.mkdir()
 
     print(" Searching Artifactory...")
-    artifacts2download = _filter_artifacts(art_repo, artifacts, start_date, end_date, py_version)
+    artifacts2download = _filter_artifacts(artifacts, start_date, end_date, py_version)
 
     print(" Downloading .xml files...")
     _download_artifacts(art, artifacts2download, art_repo, outdir)
