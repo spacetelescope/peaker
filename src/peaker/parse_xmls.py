@@ -20,6 +20,7 @@ def _parse_single_xml(filename):
     # The first element is called testsuites, this only contains one testsuite, which
     # has the datetime in which the tests were ran, variable called timestamp, in UT.
     failures = 0
+    test_date = None
     for element in root.iter("testsuites"):
         items = element.findall("testsuite")[0]
         if items is not None:
@@ -30,7 +31,7 @@ def _parse_single_xml(filename):
             raise ValueError("XML format change!")
 
     # Sanity check
-    if not test_date:
+    if test_date is None:
         raise ValueError("No test date found in XML file.")
 
     # All test cases will be under the testsuite element.
@@ -105,7 +106,7 @@ def parse_xmls(xmldir, localtz, with_failures=False):
     print(" Parsing xml ", len(xml_files), " files ... ")
     if len(xml_files) == 0:
         print("\n * No xml files to parse. Exiting program.\n")
-        exit()
+        exit(1)
 
     total_failures = 0
     file_without_data = 0
@@ -170,9 +171,9 @@ def parse_xmls(xmldir, localtz, with_failures=False):
     print(" Successful runs: ", successful_runs)
     print(" Files without peak memory data: ", file_without_data)
     print(" Total files parsed with data:" , parsed_files)
-    if successful_runs == 0:
+    if parsed_files == 0:
         print("\n * No data to parse. Exiting program. * \n")
-        exit()
+        exit(1)
 
     for test_name in tests_ran:
         print("   Data points for {}: {}".format(test_name, len(tests_ran[test_name]["date"])))

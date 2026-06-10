@@ -25,3 +25,25 @@ def test_parse_xmls(mission):
     assert output.local_sdate == expected_oldest_date
     assert output.local_edate == expected_latest_date
 
+
+def test_parse_0_xmls(tmpdir):
+    script_dir = Path(__file__).resolve().parent
+    data_dir = script_dir / "Data" / "jwst"
+
+    # test that there are no XML files in directory
+    pytest.raises(SystemExit, lambda: parse_xmls(tmpdir, "America/New_York"))
+
+    # remove peakmem data so there is no data to use
+    files = ["snippet1.xml", "snippet2.xml"]
+    for xml in files:
+        new_file = tmpdir / xml
+        with open(new_file, "w") as nf:
+            with open(str(data_dir / xml), "r") as f:
+                for line in f.readlines():
+                    if "properties" in line or "property" in line:
+                        # this skips the block that contains the peakmem data
+                        continue
+                    nf.write(line)
+
+    pytest.raises(SystemExit, lambda: parse_xmls(tmpdir, "America/New_York"))
+
