@@ -1,4 +1,6 @@
 """Utilities to find and download .xml files from with Artifactory repository"""
+
+import requests
 import pydantic
 import pyartifactory
 from pathlib import Path
@@ -29,9 +31,13 @@ def _list_artifacts(credentials_file, art_repo):
     # Get artifactory Credentials
     art_username, art_api_key = _get_artifactory_credentials(credentials_file)
 
-    # Do basic authentication
-    art = pyartifactory.Artifactory(url="https://bytesalad.stsci.edu/artifactory",
-                                    auth=(art_username, art_api_key), api_version=1)
+    try:
+        # Do basic authentication
+        art = pyartifactory.Artifactory(url="https://bytesalad.stsci.edu/artifactory",
+                                        auth=(art_username, art_api_key), api_version=1)
+    # catch a timeout connection issue or a pyartifactory error and exit gracefully 
+    except (requests.exceptions.ConnectTimeout, pyartifactory.exception.ArtifactoryError):
+        exit()
 
     # Get the artifacts with user credentials
     artifacts = art.artifacts.list(art_repo, depth=2)
@@ -108,11 +114,7 @@ def get_artifacts(credentials_file, art_repo, py_version, outdir=None, start_dat
         Full path for the output directory.
 
     """
-    try:
-        art, artifacts = _list_artifacts(credentials_file, art_repo)
-
-    except pyartifactory.exception.ArtifactoryError:
-        raise ValueError("Artifactory credentials not valid.")
+    art, artifacts = _list_artifacts(credentials_file, art_repo)
 
     # Create an output directory if none was given
     if outdir is None:
