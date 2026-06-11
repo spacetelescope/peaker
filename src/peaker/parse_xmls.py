@@ -106,7 +106,7 @@ def parse_xmls(xmldir, localtz, with_failures=False):
     print(" Parsing xml ", len(xml_files), " files ... ")
     if len(xml_files) == 0:
         print("\n * No xml files to parse. Exiting program.\n")
-        exit(1)
+        exit()
 
     total_failures = 0
     file_without_data = 0
@@ -173,7 +173,7 @@ def parse_xmls(xmldir, localtz, with_failures=False):
     print(" Total files parsed with data:" , parsed_files)
     if parsed_files == 0:
         print("\n * No data to parse. Exiting program. * \n")
-        exit(1)
+        exit()
 
     for test_name in tests_ran:
         print("   Data points for {}: {}".format(test_name, len(tests_ran[test_name]["date"])))
