@@ -1,4 +1,5 @@
 import os
+import pytest
 from pathlib import Path
 from datetime import datetime
 
@@ -6,9 +7,10 @@ from peaker.parse_xmls import parse_xmls
 from peaker.table_utils import generate_report_table
 
 
-def test_generate_report_table(tmpdir, expected_output):
+@pytest.mark.parametrize("mission", ["jwst", "roman"])
+def test_generate_report_table(mission, tmpdir, expected_output):
     script_dir = Path(__file__).resolve().parent
-    data_dir = script_dir / "Data"
+    data_dir = script_dir / "Data" / mission
 
     # Move into temp dir so that the output is created in there
     os.chdir(tmpdir)

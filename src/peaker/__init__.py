@@ -5,5 +5,3 @@ try:
 except ImportError:
     __version__ = ''
 
-# Expose subpackage API at package level.
-from .peaker import *  # noqa

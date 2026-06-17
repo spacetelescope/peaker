@@ -20,16 +20,19 @@ def _parse_single_xml(filename):
     # The first element is called testsuites, this only contains one testsuite, which
     # has the datetime in which the tests were ran, variable called timestamp, in UT.
     failures = 0
+    test_date = None
     for element in root.iter("testsuites"):
         items = element.findall("testsuite")[0]
         if items is not None:
             test_date = datetime.strptime(items.attrib["timestamp"], date_format)
             # Also get the failures variable
             failures = int(items.attrib["failures"])
+        else:
+            raise ValueError("XML format change!")
 
     # Sanity check
-    if not test_date:
-        raise ValueError("No test date found in xml file.")
+    if test_date is None:
+        raise ValueError("No test date found in XML file.")
 
     # All test cases will be under the testsuite element.
     for element in root.iter("testcase"):
@@ -72,7 +75,7 @@ class Output:
     plots: list
 
 
-def parse_xmls(xmldir, localtz):
+def parse_xmls(xmldir, localtz, with_failures=False):
     """Parse all the XML files and store the data into a dictionary.
 
     Parameters
@@ -81,6 +84,8 @@ def parse_xmls(xmldir, localtz):
         Full path for directory where to find the xml files.
     localtz : str
         Local timezone for peaker outputs.
+    with_failures : bool
+        Include the XML files that have failures > 0.
 
     Returns
     -------
@@ -106,10 +111,15 @@ def parse_xmls(xmldir, localtz):
     total_failures = 0
     file_without_data = 0
     successful_runs = 0
+    parsed_files = 0
     tests_ran = {}
     oldest_date, latest_date = datetime.now(UTC).astimezone(), None
     for i, xmlfile in enumerate(xml_files):
-        ut_test_date, failures, peakmem_dict = _parse_single_xml(xmlfile)
+        try:
+            ut_test_date, failures, peakmem_dict = _parse_single_xml(xmlfile)
+        except ValueError:
+            print("   Format issue! Skipping file: ", xmlfile)
+            continue
 
         # Convert timestamp from UTC to local time
         test_date = ut_test_date.astimezone(ZoneInfo(localtz))
@@ -125,10 +135,15 @@ def parse_xmls(xmldir, localtz):
         if failures > 0:
             # Failed run, ignore this file
             total_failures += 1
-            print("   Failed run: ", test_date, xmlfile)
-
-        elif peakmem_dict:
+            print("   Run with failures: ", test_date, xmlfile)
+        else:
             successful_runs += 1
+            print("   Successful run: ", test_date, xmlfile)
+
+        if peakmem_dict:
+            if not with_failures and failures > 0:
+                continue
+            parsed_files += 1
             for test_name, test_dict in peakmem_dict.items():
                 classname = test_dict["classname"]
                 peakmem = int(test_dict["peakmem"])
@@ -152,9 +167,13 @@ def parse_xmls(xmldir, localtz):
         else:
             print("   File without tests data: ", test_date, xmlfile)
             file_without_data += 1
-    print(" Files ignored due to failures: ", total_failures)
-    print(" Files without tests data: ", file_without_data)
+    print(" Runs with failures: ", total_failures)
     print(" Successful runs: ", successful_runs)
+    print(" Files without peak memory data: ", file_without_data)
+    print(" Total files parsed with data:" , parsed_files)
+    if parsed_files == 0:
+        print("\n * No data to parse. Exiting program. * \n")
+        exit()
 
     for test_name in tests_ran:
         print("   Data points for {}: {}".format(test_name, len(tests_ran[test_name]["date"])))

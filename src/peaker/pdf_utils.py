@@ -1,8 +1,11 @@
 """Utilities to create a PDF report with plots and a table."""
 
 import os
+from dataclasses import dataclass
 from fpdf import FPDF
 from fpdf.enums import XPos, YPos
+
+from peaker.parse_xmls import Output
 
 
 def _get_plt_path(plots, test_name, test_class):
@@ -45,6 +48,69 @@ def _select_cols(report_table):
         raise ValueError("Inconsistent column widths in PDF table.")
     
     return selected_cols, col_widths
+
+
+@dataclass
+class PdfData:
+    """Structure containing PDF information."""
+    pdf: FPDF
+    output: Output
+    classnames: str
+    selected_cols: list
+    page_counter: int
+
+
+def _add_title(pdf_data, title, title_font, title_size):
+    pdf_data.pdf.set_font(title_font, size=title_size)  # Set the font for text.
+    pdf_data.pdf.multi_cell(w=0, h=10, text=title, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
+
+
+def _add_figure(pdf_data, set_y, fig_text, mem_text, plt_xyw, table_entry):
+    # These are all the cell parameters that can be modified:
+    # Cell(width, height, text, border (0=no, 1=yes),
+    #      new_x=XPos.RIGHT, new_y=YPos.TOP,    ->  Cursor stays to the right of the cell (same line)
+    #      new_x=XPos.LMARGIN, new_y=YPos.NEXT, ->  Moves cursor to the start of the next line (left margin)
+    #      new_x=XPos.LEFT, new_y=YPos.NEXT,  ->  Moves cursor directly below the current cell
+    #      align ('L', 'C', 'R'))
+
+    # Add the text for each plot
+    pdf_data.pdf.set_y(set_y)
+    text = "{}:  {}".format(fig_text, pdf_data.output.report_table["Test_name"][0])
+    pdf_data.pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
+    text = "  - Instrument mode:  {}".format(pdf_data.output.report_table["Instrument_mode"][0])
+    pdf_data.pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
+    text = " - {}:  {} {}".format(
+        mem_text, pdf_data.output.report_table["Diff_medians"][0], pdf_data.output.report_table["Units"][0])
+    pdf_data.pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
+
+    # Get the plot name
+    plt_name = _get_plt_path(pdf_data.output.plots, pdf_data.output.report_table["Test_name"][0],
+                             pdf_data.classnames[0])
+
+    # Add the image to the page
+    pdf_data.pdf.image(plt_name, x=plt_xyw[0], y=plt_xyw[1], w=plt_xyw[2])
+
+    # Update the table entry
+    pdf_data.selected_cols[table_entry].append(str(pdf_data.page_counter))
+
+
+def _add_page_number_and_increment(pdf_data):
+    # Add the page number
+    pdf_data.pdf.set_y(265)
+    pdf_data.pdf.cell(200, 10, text=f"Page {pdf_data.page_counter}", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
+
+    # Increase the page counter
+    pdf_data.page_counter += 1
+
+
+def _add_table(pdf_data, col_widths, selected_cols):
+    greyscale = 200
+    with pdf_data.pdf.table(width=160, col_widths=col_widths,
+                   cell_fill_color=greyscale, cell_fill_mode="ROWS") as table:
+        for data_row in selected_cols:
+            row = table.row()
+            for datum in data_row:
+                row.cell(datum)
 
 
 def create_pdf(output, mission, py_version):
@@ -90,122 +156,79 @@ def create_pdf(output, mission, py_version):
     body_font_size = 9
 
     # Add content to the PDF
-    
-    pdf.add_page()  # Add a new page.
-    pdf.set_font(pdf_font, size=main_title_font_size)  # Set the font for text.
+
+    # Start the dataclass for the PDF data
+    page_counter = 1
+    pdf_data = PdfData(pdf, output, classnames, selected_cols, page_counter)
+
+    # Add first page and title of the PDF
+    pdf.add_page()
     title = "{} Regression Tests Memory Peaks from \n {} to {}".format(
         mission.upper(), output.local_sdate, output.local_edate)
-    pdf.multi_cell(w=0, h=10, text=title, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="C")
+    _add_title(pdf_data, title, pdf_font, main_title_font_size)
 
-    # First page: worse performance, highest memory peak increment
+    # Set up for the rest of the first page: worse performance, highest memory peak increment
     pdf.set_font(pdf_font, size=body_font_size)
-    page_counter = 1
-    pdf.set_y(45)
 
-    # These are all the cell parameters that can be modified:
-    # Cell(width, height, text, border (0=no, 1=yes),
-    #      new_x=XPos.RIGHT, new_y=YPos.TOP,    ->  Cursor stays to the right of the cell (same line)
-    #      new_x=XPos.LMARGIN, new_y=YPos.NEXT, ->  Moves cursor to the start of the next line (left margin)
-    #      new_x=XPos.LEFT, new_y=YPos.NEXT,  ->  Moves cursor directly below the current cell
-    #      align ('L', 'C', 'R'))
-    text = "Test with the highest memory peak **increment**:  {}".format(output.report_table["Test_name"][0])
-    pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-    text = "  - Instrument mode:  {}".format(output.report_table["Instrument_mode"][0])
-    pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-    text = " - Memory Peak increased from beginning of period by:  {} {}".format(
-        output.report_table["Diff_medians"][0], output.report_table["Units"][0])
-    pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-    plt_name = _get_plt_path(output.plots, output.report_table["Test_name"][0], classnames[0])
-    pdf.image(plt_name, x=5, y=80, w=200)  # Add an image to the page.
-    pdf.set_y(265)
-    pdf.cell(200, 10, text=f"Page {page_counter}", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
-    # Update the first table entry
-    selected_cols[1].append(str(page_counter))
-    # Increase the page counter
-    page_counter += 1
-
-    report_table = output.report_table
+    # highest memory peak
+    set_y = 45
+    fig_text = "Test with the highest memory peak **increment**"
+    mem_text = "Memory Peak increased from beginning of period by"
+    plt_xyw = [5, 80, 200]
+    table_entry = 1
+    _add_figure(pdf_data, set_y, fig_text, mem_text, plt_xyw, table_entry)
+    _add_page_number_and_increment(pdf_data)
 
     # Second page: best performance, highest memory peak decrement
     pdf.add_page()
-    pdf.set_y(30)
-    text = "Test with the highest memory peak **improvement**: {}".format(report_table["Test_name"][-1])
-    pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-    text = "  - Instrument mode:  {}".format(report_table["Instrument_mode"][-1])
-    pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-    text = " - Memory Peak increased from beginning of period by:  {} {}".format(
-        report_table["Diff_medians"][-1], report_table["Units"][-1])
-    pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-    plt_name = _get_plt_path(output.plots, report_table["Test_name"][-1], classnames[-1])
-    pdf.image(plt_name, x=5, y=70, w=200)
-    pdf.set_y(265)
-    pdf.cell(200, 10, text=f"Page {page_counter}", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
-    # Update the last table entry
-    selected_cols[-1].append(str(page_counter))
-    # Increase the page counter
-    page_counter += 1
+    set_y = 30
+    fig_text = "Test with the highest memory peak **improvement**"
+    mem_text = "Memory Peak decreased from beginning of period by"
+    plt_xyw = [5, 70, 200]
+    table_entry = -1
+    _add_figure(pdf_data, set_y, fig_text, mem_text, plt_xyw, table_entry)
+    _add_page_number_and_increment(pdf_data)
 
-    # Pages with all other plots for increments
-    # in the loop exclude the first and last entries
-    for i in range(1, len(report_table["Test_name"])-1, 2):
+    # Pages with all other tests
+    # Remember in the loop to exclude the first and last entries
+    for i in range(1, len(output.report_table["Test_name"])-1, 2):
         pdf.add_page()
         table_row = i + 1
 
-        # Only at top of the third page, add subtitle
+        # Only at top of the third page, add subtitle for the rest of the tests/plots
         if i == 1:
-            pdf.set_y(265)
-            pdf.cell(200, 10, text=f"Page {page_counter}", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
+            # add subtitle
             pdf.set_y(18)
-            pdf.set_font(pdf_font, size=sub_title_font_size)
             text = "The following pages present other changes in memory peak"
-            pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-        pdf.set_font(pdf_font, size=body_font_size)
+            _add_title(pdf_data, text, pdf_font, sub_title_font_size)
+
+            # Reset the font for the remainder of the file
+            pdf.set_font(pdf_font, size=body_font_size)
+
+        # Two plots per page from now-on
 
         # First plot in this page
-        pdf.set_y(30)
-        text = "Test name: {}".format(report_table["Test_name"][i])
-        pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-        text = "  - Instrument mode: {}".format(report_table["Instrument_mode"][i])
-        pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-        text = " - Peak memory change: {} {}".format(
-            report_table["Diff_medians"][i], report_table["Units"][i])
-        pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-        plt_name = _get_plt_path(output.plots, report_table["Test_name"][i], classnames[i])
-        pdf.image(plt_name, x=65, y=50, w=115)
-        # Add the page number where the plot can be found
-        selected_cols[table_row].append(str(page_counter))
+        set_y = 30
+        fig_text = "Test name"
+        mem_text = "Peak memory change"
+        plt_xyw = [65, 50, 115]
+        table_entry = table_row
+        _add_figure(pdf_data, set_y, fig_text, mem_text, plt_xyw, table_entry)
 
         # Second test plot in the same page
-        if len(report_table["Test_name"])-1 > i + 1:
-            pdf.set_y(145)
-            text = "Test name: {}".format(report_table["Test_name"][i+1])
-            pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-            text = "  - Instrument mode: {}".format(report_table["Instrument_mode"][i+1])
-            pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-            text = " - Peak memory change: {} {}".format(
-                report_table["Diff_medians"][i+1], report_table["Units"][i+1])
-            pdf.cell(w=0, h=10, text=text, new_x=XPos.LMARGIN, new_y=YPos.NEXT, align="L")
-            plt_name = _get_plt_path(output.plots, report_table["Test_name"][i+1], classnames[i+1])
-            pdf.image(plt_name, x=65, y=165, w=115)
-            # Add the page number where the plot can be found
-            selected_cols[table_row+1].append(str(page_counter))
+        if len(output.report_table["Test_name"])-1 > i + 1:
+            set_y = 145
+            plt_xyw = [65, 165, 115]
+            table_entry = table_row + 1
+            _add_figure(pdf_data, set_y, fig_text, mem_text, plt_xyw, table_entry)
 
-        # Increase the page counter
-        pdf.set_y(265)
-        pdf.cell(200, 10, text=f"Page {page_counter}", new_x=XPos.LMARGIN, new_y=YPos.NEXT, align='C')
-        page_counter += 1
+        # Add page number and increase the page counter
+        _add_page_number_and_increment(pdf_data)
 
-    # Add table
+    # Add table with plot names, page numbers, and other data
     pdf.add_page()
     pdf.set_y(30)
-    pdf.set_font(pdf_font, size=body_font_size)
-    greyscale = 200
-    with pdf.table(width=160, col_widths=col_widths,
-                   cell_fill_color=greyscale, cell_fill_mode="ROWS") as table:
-        for data_row in selected_cols:
-            row = table.row()
-            for datum in data_row:
-                row.cell(datum)
+    _add_table(pdf_data, col_widths, selected_cols)
 
     # Output the PDF to a file.
     pdf_name = "report_peak_mem_" + py_version + ".pdf"

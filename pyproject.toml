@@ -51,7 +51,8 @@ archs = ["arm64", "x86_64"]
 [tool.coverage.run]
 branch = true
 parallel = true
-source = ["src/", "tests/"]
+source = ["peaker", "tests/"]
+omit = ["*/peaker/tests"]
 
 [tool.coverage.report]
 show_missing = true

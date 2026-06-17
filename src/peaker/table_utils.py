@@ -167,5 +167,5 @@ def generate_report_table(output, mission, pools=None, show_table=False):
 
     csv_file = mission.upper() + "_" + table_title+".csv"
     csv_file = str(output.outdir / csv_file)
-    rt.write(csv_file, format='csv', overwrite=True)
+    rt.write(csv_file, format="csv", overwrite=True)
     print(" Table saved: ", os.path.abspath(csv_file))

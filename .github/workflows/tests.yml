@@ -58,6 +58,6 @@ jobs:
       - if: matrix.coverage
         name: report coverage to summary
         run: |
-          coverage combine
+          coverage combine || true
           echo '## Coverage Report' >> $GITHUB_STEP_SUMMARY
           coverage report -i -m --format=markdown | tee -a $GITHUB_STEP_SUMMARY

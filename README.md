@@ -56,7 +56,7 @@ Run `peaker` from the terminal as:
     local time, e.g. -p=2026-01-23to2026-02-27. Default is download everything up to today.
 
 ``--timezone or -t``
-    Timezone to convert UTC time from xml files in the plots and report, e.g. -t=GMT. Default is EST.
+    Timezone to convert UTC time from XML files in the plots and report, e.g. -t=GMT. Default is EST.
     The code takes all IANA time zone strings. You can get a complete list of available
     timezones in your system with this in a python environment:
 
@@ -65,12 +65,13 @@ Run `peaker` from the terminal as:
         import zoneinfo
         print(zoneinfo.available_timezones())
 
-``--version or -v``
+``--python-version or -v``
     Python version tested in the regression tests, e.g. -v=3.11. Default is 3.12. Regression
     Tests will usually test at least 3 versions of Python.
 
-``-s``
-    Skip downloading the xml files. This option requires the -x flag as well.
+``--with-failures or -f``
+    Include XML files that have failures > 0. Default is False.
+
 
 ## Outputs
 
