@@ -15,7 +15,7 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Astronomy",
 ]
 dependencies = [
-    "astropy>=8.0.1",
+    "astropy>=8.0.2",
     "fpdf2",
     "matplotlib",
     "numpy>=2.4.6",
@@ -37,7 +37,7 @@ peaker = "peaker.peaker:main"
 
 [build-system]
 requires = [
-  "setuptools>=84.0.0",
+  "setuptools>=84.2.1",
   "setuptools_scm[toml]",
 ]
 build-backend = "setuptools.build_meta"
